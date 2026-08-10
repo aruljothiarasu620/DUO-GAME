@@ -7,7 +7,7 @@
     "strict": false,
     "outDir": "./dist",
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": false
   },
-  "include": ["src/**/*", "../shared/**/*"]
+  "include": ["src/**/*"]
 }

@@ -1,17 +1,13 @@
-# Dockerfile for server
+# Self-contained server Dockerfile
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json ./
-COPY server/package*.json ./server/
-COPY client/package*.json ./client/
-COPY shared ./shared
+COPY package*.json ./
 
-RUN npm run install:all
+RUN npm install
 
-COPY server ./server
-COPY client ./client
+COPY . .
 
 RUN npm run build
 
@@ -19,15 +15,12 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-COPY package.json ./
-COPY server/package*.json ./server/
-COPY --from=builder /app/server/dist ./server/dist
-COPY --from=builder /app/server/node_modules ./server/node_modules
-COPY --from=builder /app/client/dist ./client/dist
-COPY --from=builder /app/shared ./shared
+COPY package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3001
 ENV PORT=3001
 ENV NODE_ENV=production
 
-CMD ["node", "server/dist/index.js"]
+CMD ["node", "dist/index.js"]

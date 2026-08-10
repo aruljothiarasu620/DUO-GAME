@@ -8,8 +8,8 @@ import type {
   PlayerMovePayload,
   InteractPayload,
   QuickChatPayload,
-} from '../../../shared/types.js';
-import { PLAYER_WIDTH, PLAYER_HEIGHT } from '../../../shared/types.js';
+} from '../shared/types.js';
+import { PLAYER_WIDTH, PLAYER_HEIGHT } from '../shared/types.js';
 
 export function registerHandlers(io: Server, socket: Socket, roomManager: RoomManager): void {
   // ── CREATE ROOM ──────────────────────────────────────────────

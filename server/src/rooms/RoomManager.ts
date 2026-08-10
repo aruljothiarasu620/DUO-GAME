@@ -1,7 +1,7 @@
 // server/src/rooms/RoomManager.ts
 
-import type { Room, Player, GameState, Level } from '../../../shared/types.js';
-import { LEVELS } from '../../../shared/levelData.js';
+import type { Room, Player, GameState, Level } from '../shared/types.js';
+import { LEVELS } from '../shared/levelData.js';
 
 function generateRoomCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
