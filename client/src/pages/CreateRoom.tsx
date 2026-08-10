@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { socket } from '../socket/socket';
-import type { Player } from '../../shared/types';
+import type { Player } from '../../../shared/types';
 
 const SKINS = [
   { name: 'Cyan Warrior',  color: '#4fc3f7', glow: '#29b6f6' },

@@ -82,5 +82,5 @@ setInterval(() => {
 // ── Start ─────────────────────────────────────────────────────
 httpServer.listen(PORT, () => {
   console.log(`\n🌐 Split World Server running on http://localhost:${PORT}`);
-  console.log(`   Accepting connections from: ${CLIENT_URL}\n`);
+  console.log(`   Accepting connections from: ${process.env.CLIENT_URL ?? '*'}\n`);
 });
