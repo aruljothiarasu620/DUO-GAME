@@ -80,7 +80,7 @@ setInterval(() => {
 }, TICK_MS);
 
 // ── Start ─────────────────────────────────────────────────────
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`\n🌐 Split World Server running on http://localhost:${PORT}`);
   console.log(`   Accepting connections from: ${process.env.CLIENT_URL ?? '*'}\n`);
 });
