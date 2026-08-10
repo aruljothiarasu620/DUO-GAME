@@ -9,16 +9,20 @@ export default function Landing() {
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState('');
 
+  const [statusMsg, setStatusMsg] = useState('');
+
   async function handleNav(path: string) {
     setConnecting(true);
     setError('');
+    setStatusMsg('🌐 Connecting to server... (Waking up Render backend)');
     try {
       await connectSocket();
       nav(path);
-    } catch {
-      setError('Cannot connect to server. Make sure the server is running on port 3001.');
+    } catch (err: any) {
+      setError(err?.message || 'Cannot connect to server. Please check your Render backend deployment.');
     } finally {
       setConnecting(false);
+      setStatusMsg('');
     }
   }
 
@@ -78,6 +82,12 @@ export default function Landing() {
             <p>Cooperate to reach the <strong>exit portal</strong></p>
           </div>
         </div>
+
+        {statusMsg && (
+          <p style={{ marginTop: 16, color: 'var(--light-primary)', fontSize: 12, textAlign: 'center', animation: 'pulse 1s infinite' }}>
+            {statusMsg}
+          </p>
+        )}
 
         {error && (
           <p style={{ marginTop: 16, color: '#ff5252', fontSize: 12, textAlign: 'center' }}>
