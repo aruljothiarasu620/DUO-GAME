@@ -1,0 +1,406 @@
+// shared/levelData.ts — 5 hand-crafted levels for Split World
+
+import type { Level } from './types';
+
+const TILE = 48; // base tile size
+
+export const LEVELS: Level[] = [
+  // ─────────────────────────────────────────────────────────────
+  // LEVEL 1 — "First Contact"
+  // P1 (light) activates a switch that lowers a bridge for P2 (dark).
+  // ─────────────────────────────────────────────────────────────
+  {
+    id: 1,
+    name: 'First Contact',
+    description: 'Learn to communicate. One flips, the other crosses.',
+    width: 2400,
+    height: 800,
+    backgroundLight: '#0a0a1a',
+    backgroundDark: '#1a0a0a',
+    player1Spawn: { x: 80, y: 580 },
+    player2Spawn: { x: 80, y: 580 },
+    platforms: [
+      // Ground
+      { id: 'g1', x: 0,    y: 700, width: 2400, height: 100, world: 'both', isMoving: false, isSolid: true },
+      // Starting ledge
+      { id: 'p1', x: 0,    y: 580, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      // P1 path (light only)
+      { id: 'p2', x: 300,  y: 520, width: 160,  height: 20,  world: 'light', isMoving: false, isSolid: true },
+      { id: 'p3', x: 540,  y: 460, width: 160,  height: 20,  world: 'light', isMoving: false, isSolid: true },
+      // Bridge (initially a door, replaced by platform)
+      // P2 path (dark only)
+      { id: 'p4', x: 300,  y: 540, width: 160,  height: 20,  world: 'dark',  isMoving: false, isSolid: true },
+      { id: 'p5', x: 540,  y: 480, width: 160,  height: 20,  world: 'dark',  isMoving: false, isSolid: true },
+      // Mid section (both)
+      { id: 'p6', x: 760,  y: 620, width: 300,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      // End platform
+      { id: 'p7', x: 2100, y: 580, width: 250,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      // Bridge platform (revealed by switch_1)
+      { id: 'bridge1', x: 1150, y: 620, width: 400, height: 20, world: 'light', isMoving: false, isSolid: true },
+      { id: 'bridge2', x: 1150, y: 640, width: 400, height: 20, world: 'dark',  isMoving: false, isSolid: true },
+      // Approach platforms
+      { id: 'p8', x: 950,  y: 560, width: 150,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p9', x: 1620, y: 600, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p10',x: 1900, y: 560, width: 150,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+    ],
+    switches: [
+      {
+        id: 'switch_1',
+        x: 780, y: 590,
+        width: 40, height: 30,
+        world: 'light',
+        isActive: false,
+        targetId: 'door_bridge',
+        label: 'Open Bridge',
+      },
+    ],
+    doors: [
+      {
+        id: 'door_bridge',
+        x: 1150, y: 490,
+        width: 400, height: 130,
+        world: 'both',
+        isOpen: false,
+        openCondition: 'switch_1',
+        isSolid: true,
+      },
+    ],
+    enemies: [],
+    checkpoints: [
+      { id: 'cp1', x: 800, y: 590, width: 30, height: 50, world: 'both', activated: false },
+    ],
+    exit: {
+      id: 'exit',
+      x: 2200, y: 510,
+      width: 64, height: 80,
+      world: 'both',
+      requiresBothPlayers: true,
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // LEVEL 2 — "Invisible Path"
+  // P2 (dark) sees platforms invisible to P1 (light). P2 guides P1.
+  // ─────────────────────────────────────────────────────────────
+  {
+    id: 2,
+    name: 'Invisible Path',
+    description: 'Trust your partner — they see what you cannot.',
+    width: 2400,
+    height: 800,
+    backgroundLight: '#050518',
+    backgroundDark: '#180505',
+    player1Spawn: { x: 80, y: 620 },
+    player2Spawn: { x: 80, y: 620 },
+    platforms: [
+      { id: 'g1', x: 0,    y: 700, width: 2400, height: 100, world: 'both',  isMoving: false, isSolid: true },
+      { id: 's1', x: 0,    y: 620, width: 220,  height: 20,  world: 'both',  isMoving: false, isSolid: true },
+      // Invisible path (dark only)
+      { id: 'ip1', x: 290,  y: 620, width: 80, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'ip2', x: 450,  y: 580, width: 80, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'ip3', x: 620,  y: 540, width: 80, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'ip4', x: 780,  y: 500, width: 80, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'ip5', x: 950,  y: 540, width: 80, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'ip6', x: 1100, y: 580, width: 80, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'ip7', x: 1260, y: 560, width: 80, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'ip8', x: 1420, y: 520, width: 80, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      // Both visible end section
+      { id: 'e1', x: 1550, y: 560, width: 200, height: 20, world: 'both', isMoving: false, isSolid: true },
+      { id: 'e2', x: 1820, y: 500, width: 200, height: 20, world: 'both', isMoving: false, isSolid: true },
+      { id: 'e3', x: 2050, y: 560, width: 300, height: 20, world: 'both', isMoving: false, isSolid: true },
+    ],
+    switches: [
+      {
+        id: 'switch_2a',
+        x: 1570, y: 530,
+        width: 40, height: 30,
+        world: 'dark',
+        isActive: false,
+        targetId: 'door_2a',
+        label: 'Reveal Path',
+      },
+    ],
+    doors: [
+      {
+        id: 'door_2a',
+        x: 1830, y: 380,
+        width: 180, height: 120,
+        world: 'both',
+        isOpen: false,
+        openCondition: 'switch_2a',
+        isSolid: true,
+      },
+    ],
+    enemies: [],
+    checkpoints: [
+      { id: 'cp2', x: 1560, y: 530, width: 30, height: 50, world: 'both', activated: false },
+    ],
+    exit: {
+      id: 'exit',
+      x: 2200, y: 490,
+      width: 64, height: 80,
+      world: 'both',
+      requiresBothPlayers: true,
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // LEVEL 3 — "Sync or Sink"
+  // Two switches must be activated within 5 seconds of each other.
+  // ─────────────────────────────────────────────────────────────
+  {
+    id: 3,
+    name: 'Sync or Sink',
+    description: 'Both switches — activate within 5 seconds of each other.',
+    width: 2400,
+    height: 800,
+    backgroundLight: '#080820',
+    backgroundDark: '#200808',
+    player1Spawn: { x: 80, y: 600 },
+    player2Spawn: { x: 2280, y: 600 },
+    platforms: [
+      { id: 'g1',  x: 0,    y: 700, width: 2400, height: 100, world: 'both',  isMoving: false, isSolid: true },
+      { id: 's1',  x: 0,    y: 600, width: 200,  height: 20,  world: 'both',  isMoving: false, isSolid: true },
+      { id: 's2',  x: 2200, y: 600, width: 200,  height: 20,  world: 'both',  isMoving: false, isSolid: true },
+      // P1 path (left side)
+      { id: 'l1',  x: 250,  y: 560, width: 140, height: 20, world: 'light', isMoving: false, isSolid: true },
+      { id: 'l2',  x: 460,  y: 520, width: 140, height: 20, world: 'light', isMoving: false, isSolid: true },
+      { id: 'l3',  x: 680,  y: 480, width: 140, height: 20, world: 'light', isMoving: false, isSolid: true },
+      { id: 'l4',  x: 880,  y: 520, width: 140, height: 20, world: 'light', isMoving: false, isSolid: true },
+      // P2 path (right side)
+      { id: 'r1',  x: 2010, y: 560, width: 140, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'r2',  x: 1800, y: 520, width: 140, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'r3',  x: 1580, y: 480, width: 140, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      { id: 'r4',  x: 1380, y: 520, width: 140, height: 20, world: 'dark', isMoving: false, isSolid: true },
+      // Center area (both)
+      { id: 'c1',  x: 1050, y: 460, width: 300, height: 20, world: 'both', isMoving: false, isSolid: true },
+    ],
+    switches: [
+      {
+        id: 'switch_3a',
+        x: 700, y: 450,
+        width: 40, height: 30,
+        world: 'light',
+        isActive: false,
+        targetId: 'door_3_center',
+        label: 'P1 Switch',
+      },
+      {
+        id: 'switch_3b',
+        x: 1620, y: 450,
+        width: 40, height: 30,
+        world: 'dark',
+        isActive: false,
+        targetId: 'door_3_center',
+        label: 'P2 Switch',
+      },
+    ],
+    doors: [
+      {
+        id: 'door_3_center',
+        x: 1050, y: 340,
+        width: 300, height: 120,
+        world: 'both',
+        isOpen: false,
+        openCondition: 'switch_3a+switch_3b',
+        isSolid: true,
+      },
+    ],
+    enemies: [],
+    checkpoints: [
+      { id: 'cp3a', x: 900, y: 490, width: 30, height: 50, world: 'light', activated: false },
+      { id: 'cp3b', x: 1400, y: 490, width: 30, height: 50, world: 'dark',  activated: false },
+    ],
+    exit: {
+      id: 'exit',
+      x: 1168, y: 390,
+      width: 64, height: 80,
+      world: 'both',
+      requiresBothPlayers: true,
+    },
+    timedChallenge: {
+      id: 'timed_3',
+      duration: 8,
+      isActive: false,
+      startTime: 0,
+      onExpire: 'reset_switches',
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // LEVEL 4 — "Enemy Zone"
+  // Enemies visible only to P2 (dark). P1 is blind to them.
+  // ─────────────────────────────────────────────────────────────
+  {
+    id: 4,
+    name: 'Enemy Zone',
+    description: "Enemies lurk — but only one of you can see them.",
+    width: 2400,
+    height: 800,
+    backgroundLight: '#040418',
+    backgroundDark: '#181004',
+    player1Spawn: { x: 80, y: 600 },
+    player2Spawn: { x: 80, y: 600 },
+    platforms: [
+      { id: 'g1',  x: 0,    y: 700, width: 2400, height: 100, world: 'both', isMoving: false, isSolid: true },
+      { id: 's1',  x: 0,    y: 600, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p1',  x: 260,  y: 600, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p2',  x: 520,  y: 540, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p3',  x: 780,  y: 600, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p4',  x: 1040, y: 540, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p5',  x: 1300, y: 600, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p6',  x: 1560, y: 540, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p7',  x: 1820, y: 600, width: 200,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+      { id: 'p8',  x: 2080, y: 560, width: 270,  height: 20,  world: 'both', isMoving: false, isSolid: true },
+    ],
+    switches: [
+      {
+        id: 'switch_4',
+        x: 2100, y: 530,
+        width: 40, height: 30,
+        world: 'light',
+        isActive: false,
+        targetId: 'door_4',
+        label: 'Open Exit',
+      },
+    ],
+    doors: [
+      {
+        id: 'door_4',
+        x: 2270, y: 400,
+        width: 80, height: 160,
+        world: 'both',
+        isOpen: false,
+        openCondition: 'switch_4',
+        isSolid: true,
+      },
+    ],
+    enemies: [
+      { id: 'e1', x: 310,  y: 557, width: 40, height: 44, world: 'dark', patrolMin: 260, patrolMax: 440,  speed: 80,  direction: 1, isAlive: true },
+      { id: 'e2', x: 580,  y: 497, width: 40, height: 44, world: 'dark', patrolMin: 520, patrolMax: 700,  speed: 100, direction: 1, isAlive: true },
+      { id: 'e3', x: 840,  y: 557, width: 40, height: 44, world: 'dark', patrolMin: 780, patrolMax: 960,  speed: 90,  direction: -1, isAlive: true },
+      { id: 'e4', x: 1100, y: 497, width: 40, height: 44, world: 'dark', patrolMin: 1040, patrolMax: 1220, speed: 110, direction: 1, isAlive: true },
+      { id: 'e5', x: 1360, y: 557, width: 40, height: 44, world: 'dark', patrolMin: 1300, patrolMax: 1480, speed: 95,  direction: -1, isAlive: true },
+      { id: 'e6', x: 1620, y: 497, width: 40, height: 44, world: 'dark', patrolMin: 1560, patrolMax: 1740, speed: 120, direction: 1, isAlive: true },
+    ],
+    checkpoints: [
+      { id: 'cp4a', x: 800, y: 570, width: 30, height: 50, world: 'both', activated: false },
+      { id: 'cp4b', x: 1600, y: 510, width: 30, height: 50, world: 'both', activated: false },
+    ],
+    exit: {
+      id: 'exit',
+      x: 2290, y: 360,
+      width: 64, height: 80,
+      world: 'both',
+      requiresBothPlayers: true,
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // LEVEL 5 — "Final Split"
+  // All mechanics combined: moving platforms, timed doors, enemies, invisible paths.
+  // ─────────────────────────────────────────────────────────────
+  {
+    id: 5,
+    name: 'Final Split',
+    description: 'Every trick in the book. Unite your worlds.',
+    width: 2800,
+    height: 900,
+    backgroundLight: '#020214',
+    backgroundDark: '#140202',
+    player1Spawn: { x: 80, y: 680 },
+    player2Spawn: { x: 80, y: 680 },
+    platforms: [
+      { id: 'g1',   x: 0,    y: 800, width: 2800, height: 100, world: 'both',  isMoving: false, isSolid: true },
+      { id: 's1',   x: 0,    y: 680, width: 200,  height: 20,  world: 'both',  isMoving: false, isSolid: true },
+      // Moving platforms (light)
+      { id: 'mp1',  x: 280,  y: 620, width: 120,  height: 20, world: 'light', isMoving: true, moveAxis: 'x', moveMin: 280, moveMax: 480, moveSpeed: 80, isSolid: true },
+      { id: 'mp2',  x: 560,  y: 560, width: 120,  height: 20, world: 'light', isMoving: true, moveAxis: 'y', moveMin: 480, moveMax: 600, moveSpeed: 60, isSolid: true },
+      // Static (dark) path
+      { id: 'd1',   x: 280,  y: 640, width: 120,  height: 20, world: 'dark',  isMoving: false, isSolid: true },
+      { id: 'd2',   x: 500,  y: 580, width: 120,  height: 20, world: 'dark',  isMoving: false, isSolid: true },
+      // Both mid section
+      { id: 'm1',   x: 750,  y: 580, width: 200,  height: 20, world: 'both',  isMoving: false, isSolid: true },
+      // Invisible path (dark only) — center gap
+      { id: 'ip1',  x: 1020, y: 560, width: 80,   height: 20, world: 'dark',  isMoving: false, isSolid: true },
+      { id: 'ip2',  x: 1180, y: 520, width: 80,   height: 20, world: 'dark',  isMoving: false, isSolid: true },
+      { id: 'ip3',  x: 1340, y: 480, width: 80,   height: 20, world: 'dark',  isMoving: false, isSolid: true },
+      { id: 'ip4',  x: 1500, y: 520, width: 80,   height: 20, world: 'dark',  isMoving: false, isSolid: true },
+      // Light side stairs
+      { id: 'ls1',  x: 1020, y: 540, width: 80,   height: 20, world: 'light', isMoving: false, isSolid: true },
+      { id: 'ls2',  x: 1160, y: 500, width: 80,   height: 20, world: 'light', isMoving: false, isSolid: true },
+      { id: 'ls3',  x: 1300, y: 460, width: 80,   height: 20, world: 'light', isMoving: false, isSolid: true },
+      { id: 'ls4',  x: 1440, y: 500, width: 80,   height: 20, world: 'light', isMoving: false, isSolid: true },
+      // Big center platform
+      { id: 'c1',   x: 1620, y: 480, width: 300,  height: 20, world: 'both',  isMoving: false, isSolid: true },
+      // Moving platform near end
+      { id: 'mp3',  x: 1990, y: 520, width: 120,  height: 20, world: 'both',  isMoving: true, moveAxis: 'y', moveMin: 440, moveMax: 560, moveSpeed: 70, isSolid: true },
+      // Final stretch
+      { id: 'f1',   x: 2180, y: 540, width: 200,  height: 20, world: 'both',  isMoving: false, isSolid: true },
+      { id: 'f2',   x: 2460, y: 500, width: 300,  height: 20, world: 'both',  isMoving: false, isSolid: true },
+    ],
+    switches: [
+      {
+        id: 'switch_5a',
+        x: 770, y: 550,
+        width: 40, height: 30,
+        world: 'light',
+        isActive: false,
+        targetId: 'door_5_mid',
+        label: 'P1 — Mid Gate',
+      },
+      {
+        id: 'switch_5b',
+        x: 1640, y: 450,
+        width: 40, height: 30,
+        world: 'dark',
+        isActive: false,
+        targetId: 'door_5_final',
+        label: 'P2 — Final Gate',
+      },
+    ],
+    doors: [
+      {
+        id: 'door_5_mid',
+        x: 920, y: 440,
+        width: 80, height: 140,
+        world: 'both',
+        isOpen: false,
+        openCondition: 'switch_5a',
+        isSolid: true,
+      },
+      {
+        id: 'door_5_final',
+        x: 2560, y: 320,
+        width: 100, height: 180,
+        world: 'both',
+        isOpen: false,
+        openCondition: 'switch_5a+switch_5b',
+        isSolid: true,
+      },
+    ],
+    enemies: [
+      { id: 'e1', x: 1640, y: 437, width: 40, height: 44, world: 'dark',  patrolMin: 1620, patrolMax: 1880, speed: 100, direction: 1,  isAlive: true },
+      { id: 'e2', x: 2220, y: 497, width: 40, height: 44, world: 'dark',  patrolMin: 2180, patrolMax: 2360, speed: 120, direction: -1, isAlive: true },
+      { id: 'e3', x: 2500, y: 457, width: 40, height: 44, world: 'light', patrolMin: 2460, patrolMax: 2720, speed: 90,  direction: 1,  isAlive: true },
+    ],
+    checkpoints: [
+      { id: 'cp5a', x: 760, y: 550, width: 30, height: 50, world: 'both', activated: false },
+      { id: 'cp5b', x: 1640, y: 450, width: 30, height: 50, world: 'both', activated: false },
+    ],
+    exit: {
+      id: 'exit',
+      x: 2680, y: 430,
+      width: 64, height: 80,
+      world: 'both',
+      requiresBothPlayers: true,
+    },
+    timedChallenge: {
+      id: 'timed_5',
+      duration: 10,
+      isActive: false,
+      startTime: 0,
+      onExpire: 'reset_switches',
+    },
+  },
+];

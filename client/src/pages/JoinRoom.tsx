@@ -1,0 +1,130 @@
+// client/src/pages/JoinRoom.tsx
+
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { socket } from '../socket/socket';
+import type { Player } from '../../shared/types';
+
+const SKINS = [
+  { name: 'Cyan Warrior',  color: '#4fc3f7', glow: '#29b6f6' },
+  { name: 'Purple Mystic', color: '#ce93d8', glow: '#ba68c8' },
+  { name: 'Teal Ghost',    color: '#80cbc4', glow: '#4db6ac' },
+  { name: 'Amber Knight',  color: '#ffcc80', glow: '#ffa726' },
+];
+
+export default function JoinRoom() {
+  const nav = useNavigate();
+  const [name, setName] = useState('');
+  const [code, setCode] = useState('');
+  const [skin, setSkin] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  function handleJoin() {
+    if (!name.trim()) { setError('Enter your name!'); return; }
+    if (code.trim().length < 5) { setError('Enter a 5-character room code.'); return; }
+    setLoading(true);
+    setError('');
+
+    socket.emit('join-room', { playerName: name.trim(), roomCode: code.trim().toUpperCase(), skin }, (res: {
+      success: boolean; error?: string; roomCode: string; world: string; player: Player;
+    }) => {
+      setLoading(false);
+      if (!res.success) { setError(res.error ?? 'Failed to join room.'); return; }
+      nav('/game', { state: { roomCode: res.roomCode, world: res.world, player: res.player, isHost: false } });
+    });
+  }
+
+  return (
+    <div className="flex-center flex-col" style={{ height: '100%', position: 'relative' }}>
+      <div className="stars-bg" />
+      <div className="scanlines" />
+
+      <div className="glass-card" style={{ padding: 40, width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}>
+        <button
+          className="btn btn-ghost"
+          style={{ marginBottom: 24, padding: '8px 16px', fontSize: 12 }}
+          onClick={() => nav('/')}
+        >
+          ← BACK
+        </button>
+
+        <h2 style={{ fontFamily: 'Orbitron', fontSize: 22, marginBottom: 6 }}>
+          <span className="neon-dark">JOIN</span> ROOM
+        </h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 28 }}>
+          You'll inhabit the <strong className="neon-dark">Dark Realm 🌑</strong>
+        </p>
+
+        <div className="form-group">
+          <label className="label">Your Name</label>
+          <input
+            className="input"
+            placeholder="Enter codename…"
+            value={name}
+            maxLength={16}
+            onChange={e => setName(e.target.value)}
+            autoFocus
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="label">Room Code</label>
+          <input
+            className="input input-code"
+            placeholder="XXXXX"
+            value={code}
+            maxLength={5}
+            onChange={e => setCode(e.target.value.toUpperCase())}
+            onKeyDown={e => e.key === 'Enter' && handleJoin()}
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="label">Choose Skin</label>
+          <div className="char-select-grid">
+            {SKINS.map((s, i) => (
+              <button
+                key={i}
+                className={`char-option${skin === i ? ' selected' : ''}`}
+                onClick={() => setSkin(i)}
+                style={{ cursor: 'pointer', background: 'none', border: '2px solid', borderColor: skin === i ? s.glow : 'var(--border)', borderRadius: 12 }}
+              >
+                <SkinPreview color={s.color} glow={s.glow} />
+                <div style={{ fontSize: 11, color: skin === i ? s.color : 'var(--text-muted)', marginTop: 6 }}>
+                  {s.name}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {error && <p style={{ color: '#ff5252', fontSize: 12, marginBottom: 12 }}>⚠ {error}</p>}
+
+        <button
+          className="btn btn-danger"
+          style={{ width: '100%', padding: '14px' }}
+          onClick={handleJoin}
+          disabled={loading}
+        >
+          {loading ? <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} /> : '⟡ JOIN ROOM'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SkinPreview({ color, glow }: { color: string; glow: string }) {
+  return (
+    <svg width="48" height="60" viewBox="0 0 48 60" style={{ display: 'block', margin: '0 auto' }}>
+      <rect x="7" y="24" width="34" height="32" rx="8" fill={color} />
+      <circle cx="24" cy="16" r="14" fill={color} />
+      <circle cx="19" cy="15" r="4" fill="#fff" />
+      <circle cx="29" cy="15" r="4" fill="#fff" />
+      <circle cx="20" cy="15" r="2" fill="#1a237e" />
+      <circle cx="30" cy="15" r="2" fill="#1a237e" />
+      <rect x="7" y="24" width="34" height="32" rx="8" fill="none" stroke={glow} strokeWidth="1.5" />
+      <circle cx="24" cy="16" r="14" fill="none" stroke={glow} strokeWidth="1.5" />
+    </svg>
+  );
+}
