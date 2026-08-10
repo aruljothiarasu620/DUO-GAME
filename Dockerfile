@@ -1,40 +1,38 @@
-# Multi-stage Dockerfile for Split World Full-Stack / Backend Deployment
-
-# Stage 1: Build
+# Base image
 FROM node:20-alpine AS builder
+
 WORKDIR /app
 
-# Copy root and package definitions
+# Copy root and package files
 COPY package.json ./
-COPY client/package*.json ./client/
 COPY server/package*.json ./server/
+COPY client/package*.json ./client/
+COPY shared ./shared
 
 # Install dependencies
-RUN npm install --prefix server
-RUN npm install --prefix client
+RUN npm run install:all
 
 # Copy source code
-COPY shared ./shared
-COPY client ./client
 COPY server ./server
+COPY client ./client
 
-# Build client dist and server dist
-RUN npm run build --prefix client
-RUN npm run build --prefix server
+# Build both client and server
+RUN npm run build
 
-# Stage 2: Production runner
+# Production image
 FROM node:20-alpine AS runner
+
 WORKDIR /app
+
+COPY package.json ./
+COPY server/package*.json ./server/
+COPY --from=builder /app/server/dist ./server/dist
+COPY --from=builder /app/server/node_modules ./server/node_modules
+COPY --from=builder /app/client/dist ./client/dist
+COPY --from=builder /app/shared ./shared
+
+EXPOSE 3001
+ENV PORT=3001
 ENV NODE_ENV=production
 
-# Copy root package.json and workspace files
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/shared ./shared
-COPY --from=builder /app/server ./server
-COPY --from=builder /app/client/dist ./client/dist
-
-# Expose default port
-EXPOSE 3001
-
-# Run Node server
 CMD ["node", "server/dist/index.js"]
