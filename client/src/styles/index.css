@@ -461,3 +461,78 @@ html, body, #root {
   from { opacity: 0; transform: translateY(16px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0)    scale(1); }
 }
+
+/* ── Mobile Responsive Rules ──────────────────────────────── */
+@media (max-width: 768px) {
+  .hud {
+    padding: 8px 10px;
+    gap: 4px;
+  }
+  .hud-lives .heart {
+    font-size: 14px;
+  }
+  .level-pill {
+    font-size: 8px;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+  }
+  .toast-container {
+    top: 110px;
+    width: 90%;
+  }
+  .toast {
+    font-size: 11px;
+    padding: 6px 12px;
+    white-space: normal;
+    text-align: center;
+  }
+  #chatbox-panel {
+    top: 52px !important;
+    right: 8px !important;
+    width: calc(100vw - 16px) !important;
+    max-width: 260px !important;
+    height: 175px !important;
+    font-size: 11px;
+  }
+  .touch-controls {
+    padding: 8px 12px 16px;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  .dpad {
+    grid-template-columns: 44px 44px 44px;
+    grid-template-rows: 44px 44px 44px;
+    gap: 3px;
+  }
+  .dpad-btn {
+    font-size: 16px;
+    border-radius: 8px;
+    background: rgba(8, 8, 32, 0.9);
+  }
+  .action-btns {
+    gap: 10px;
+  }
+  .action-btn {
+    width: 56px;
+    height: 56px;
+    font-size: 11px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  }
+  .glass-card {
+    padding: 24px 18px !important;
+    max-width: 92vw !important;
+  }
+  .landing-title {
+    font-size: 36px !important;
+  }
+  .landing-sub {
+    font-size: 12px !important;
+    letter-spacing: 2px !important;
+  }
+  .room-code-display {
+    font-size: 24px !important;
+    letter-spacing: 4px !important;
+    padding: 10px 14px !important;
+  }
+}

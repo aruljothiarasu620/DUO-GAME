@@ -43,7 +43,18 @@ export default function GameScreen() {
   const [partners, setPartners] = useState<Player[]>([]);
   const [victoryStats, setVictoryStats] = useState<{ time: number; score: number } | null>(null);
   const [currentLevel, setCurrentLevel] = useState(0);
-  const [isTouchDevice] = useState(() => 'ontouchstart' in window);
+  const [isTouchDevice, setIsTouchDevice] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return 'ontouchstart' in window || (navigator.maxTouchPoints > 0) || window.innerWidth <= 768;
+  });
+
+  useEffect(() => {
+    const checkTouch = () => {
+      setIsTouchDevice('ontouchstart' in window || (navigator.maxTouchPoints > 0) || window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', checkTouch);
+    return () => window.removeEventListener('resize', checkTouch);
+  }, []);
 
   // ── Chat state ────────────────────────────────────────────────
   const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
@@ -266,8 +277,14 @@ export default function GameScreen() {
   }
 
   // ── Touch controls ─────────────────────────────────────────────
-  function touchStart(key: string) { engineRef.current?.setInput({ [key]: true }); }
-  function touchEnd(key: string)   { engineRef.current?.setInput({ [key]: false }); }
+  function touchStart(key: string, e?: React.TouchEvent) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    engineRef.current?.setInput({ [key]: true });
+  }
+  function touchEnd(key: string, e?: React.TouchEvent) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    engineRef.current?.setInput({ [key]: false });
+  }
 
   // ─────────────────────────────────────────────────────────────
   // RENDER: Waiting Lobby
@@ -587,16 +604,16 @@ export default function GameScreen() {
             <div className="touch-controls">
               <div className="dpad">
                 <div className="dpad-btn empty" />
-                <div className="dpad-btn" onTouchStart={() => touchStart('jump')} onTouchEnd={() => touchEnd('jump')}>▲</div>
+                <div className="dpad-btn" onTouchStart={(e) => touchStart('jump', e)} onTouchEnd={(e) => touchEnd('jump', e)}>▲</div>
                 <div className="dpad-btn empty" />
-                <div className="dpad-btn" onTouchStart={() => touchStart('left')} onTouchEnd={() => touchEnd('left')}>◀</div>
+                <div className="dpad-btn" onTouchStart={(e) => touchStart('left', e)} onTouchEnd={(e) => touchEnd('left', e)}>◀</div>
                 <div className="dpad-btn empty" />
-                <div className="dpad-btn" onTouchStart={() => touchStart('right')} onTouchEnd={() => touchEnd('right')}>▶</div>
+                <div className="dpad-btn" onTouchStart={(e) => touchStart('right', e)} onTouchEnd={(e) => touchEnd('right', e)}>▶</div>
                 <div className="dpad-btn empty" /><div className="dpad-btn empty" /><div className="dpad-btn empty" />
               </div>
               <div className="action-btns">
-                <button className="action-btn interact" onTouchStart={() => touchStart('interact')} onTouchEnd={() => touchEnd('interact')}>E</button>
-                <button className="action-btn jump" onTouchStart={() => touchStart('jump')} onTouchEnd={() => touchEnd('jump')}>JUMP</button>
+                <button className="action-btn interact" onTouchStart={(e) => touchStart('interact', e)} onTouchEnd={(e) => touchEnd('interact', e)}>⚡ E</button>
+                <button className="action-btn jump" onTouchStart={(e) => touchStart('jump', e)} onTouchEnd={(e) => touchEnd('jump', e)}>JUMP</button>
               </div>
             </div>
           )}
