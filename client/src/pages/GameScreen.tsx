@@ -37,7 +37,7 @@ export default function GameScreen() {
   const [phase, setPhase] = useState<'waiting' | 'playing' | 'levelComplete' | 'gameOver' | 'victory'>('waiting');
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [showChat, setShowChat] = useState(false);
+  const [showChat, setShowChat] = useState(true);
   const [showQuickChat, setShowQuickChat] = useState(false);
   const [muted, setMuted] = useState(false);
   const [partners, setPartners] = useState<Player[]>([]);
@@ -341,14 +341,36 @@ export default function GameScreen() {
               </div>
             </div>
 
-            {/* Center: Room code */}
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontFamily: 'Share Tech Mono', fontSize: 13, color: 'var(--text-muted)', letterSpacing: 3 }}>
-                {state?.roomCode}
+            {/* Center: Room code & Switch Sync Status */}
+            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <div style={{ fontFamily: 'Share Tech Mono', fontSize: 12, color: 'var(--text-muted)', letterSpacing: 2 }}>
+                ROOM: {state?.roomCode}
               </div>
-              <span className={`badge badge-${state?.world}`} style={{ marginTop: 4 }}>
-                {state?.world === 'light' ? '☀ LIGHT' : '🌑 DARK'}
-              </span>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <span className={`badge badge-${state?.world}`}>
+                  {state?.world === 'light' ? '☀ LIGHT' : '🌑 DARK'}
+                </span>
+                {gameState && gameState.switches.length > 0 && (
+                  <span style={{
+                    fontFamily: 'Orbitron, sans-serif',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: 100,
+                    background: gameState.switches.every(s => s.isActive)
+                      ? 'rgba(0,230,118,0.2)'
+                      : 'rgba(255,213,79,0.15)',
+                    border: `1px solid ${gameState.switches.every(s => s.isActive) ? '#00e676' : '#ffd54f'}`,
+                    color: gameState.switches.every(s => s.isActive) ? '#00e676' : '#ffd54f',
+                    boxShadow: gameState.switches.every(s => s.isActive) ? '0 0 10px #00e67680' : 'none',
+                    animation: gameState.switches.every(s => s.isActive) ? 'pulse 1s infinite' : 'none',
+                  }}>
+                    {gameState.switches.every(s => s.isActive)
+                      ? '🔓 SYNC COMPLETE'
+                      : `⚡ SWITCHES: ${gameState.switches.filter(s => s.isActive).length}/${gameState.switches.length}`}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Right: Controls */}
@@ -399,40 +421,40 @@ export default function GameScreen() {
             ))}
           </div>
 
-          {/* ── CHAT BOX ─────────────────────────────────────────── */}
+          {/* ── CHAT BOX (FIXED OPEN TOP RIGHT - NON-DISTRACTING) ───────────────────── */}
           {showChat && (
             <div id="chatbox-panel" style={{
               position: 'absolute',
-              bottom: isTouchDevice ? 200 : 16,
+              top: 64,
               right: 16,
-              width: 320,
-              height: 380,
+              width: 290,
+              height: 250,
               display: 'flex',
               flexDirection: 'column',
-              background: 'rgba(4,4,20,0.96)',
-              border: `1px solid ${worldColor}`,
-              borderRadius: 14,
-              boxShadow: `0 0 30px ${worldGlow}, 0 8px 32px rgba(0,0,0,0.6)`,
+              background: 'rgba(4,4,20,0.72)',
+              border: `1px solid ${worldColor}55`,
+              borderRadius: 12,
+              boxShadow: `0 0 20px ${worldGlow}, 0 6px 24px rgba(0,0,0,0.5)`,
               zIndex: 40,
               overflow: 'hidden',
-              backdropFilter: 'blur(16px)',
+              backdropFilter: 'blur(12px)',
               animation: 'chatSlideIn 0.2s ease',
             }}>
               {/* Chat Header */}
               <div style={{
-                padding: '10px 14px',
-                background: `linear-gradient(135deg, ${worldColor}22, transparent)`,
-                borderBottom: `1px solid ${worldColor}44`,
+                padding: '6px 12px',
+                background: `linear-gradient(135deg, ${worldColor}33, transparent)`,
+                borderBottom: `1px solid ${worldColor}33`,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 16 }}>💬</span>
-                  <span style={{ fontFamily: 'Orbitron', fontSize: 11, color: worldColor, letterSpacing: 2 }}>LIVE CHAT</span>
-                  <span style={{ fontSize: 9, color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4 }}>T to toggle</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 13 }}>💬</span>
+                  <span style={{ fontFamily: 'Orbitron', fontSize: 10, color: worldColor, letterSpacing: 1.5 }}>LIVE CHAT (FIXED)</span>
                 </div>
                 <button
                   onClick={() => setShowChat(false)}
-                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: 4 }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 2 }}
+                  title="Minimize Chat"
                 >✕</button>
               </div>
 
@@ -442,19 +464,18 @@ export default function GameScreen() {
                 style={{
                   flex: 1,
                   overflowY: 'auto',
-                  padding: '10px 12px',
+                  padding: '8px 10px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 6,
+                  gap: 4,
                   scrollbarWidth: 'thin',
                   scrollbarColor: `${worldColor}40 transparent`,
                 }}
               >
                 {chatMessages.length === 0 && (
-                  <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12, marginTop: 40 }}>
-                    <div style={{ fontSize: 28, marginBottom: 8 }}>💬</div>
+                  <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 24 }}>
                     <div>No messages yet.</div>
-                    <div style={{ fontSize: 10, marginTop: 4, opacity: 0.6 }}>Say hi to your partner!</div>
+                    <div style={{ fontSize: 10, marginTop: 2, opacity: 0.6 }}>Type to talk with partner!</div>
                   </div>
                 )}
 
@@ -465,9 +486,9 @@ export default function GameScreen() {
 
               {/* Quick-chat shortcuts inside chat */}
               <div style={{
-                padding: '6px 10px',
+                padding: '4px 8px',
                 borderTop: '1px solid rgba(255,255,255,0.05)',
-                display: 'flex', gap: 4, flexWrap: 'wrap',
+                display: 'flex', gap: 3, flexWrap: 'wrap',
               }}>
                 {QUICK_CHAT_MESSAGES.map((m, i) => (
                   <button
@@ -476,10 +497,10 @@ export default function GameScreen() {
                     style={{
                       background: 'rgba(255,255,255,0.04)',
                       border: `1px solid ${worldColor}33`,
-                      borderRadius: 6,
+                      borderRadius: 4,
                       color: 'var(--text-muted)',
-                      fontSize: 9,
-                      padding: '3px 7px',
+                      fontSize: 8.5,
+                      padding: '2px 5px',
                       cursor: 'pointer',
                       transition: 'all 0.15s',
                     }}
@@ -493,10 +514,10 @@ export default function GameScreen() {
 
               {/* Chat Input */}
               <div style={{
-                padding: '10px 12px',
+                padding: '6px 8px',
                 borderTop: `1px solid ${worldColor}33`,
-                display: 'flex', gap: 8, alignItems: 'center',
-                background: 'rgba(0,0,0,0.4)',
+                display: 'flex', gap: 6, alignItems: 'center',
+                background: 'rgba(0,0,0,0.5)',
               }}>
                 <input
                   ref={chatInputRef}
@@ -509,19 +530,18 @@ export default function GameScreen() {
                     // Stop game keys from firing while typing
                     e.stopPropagation();
                   }}
-                  placeholder="Type a message… (Enter to send)"
+                  placeholder="Type a message..."
                   maxLength={120}
                   style={{
                     flex: 1,
-                    background: 'rgba(255,255,255,0.05)',
+                    background: 'rgba(255,255,255,0.06)',
                     border: `1px solid ${worldColor}44`,
-                    borderRadius: 8,
+                    borderRadius: 6,
                     color: '#fff',
-                    fontSize: 12,
-                    padding: '8px 12px',
+                    fontSize: 11,
+                    padding: '5px 8px',
                     outline: 'none',
                     fontFamily: 'Rajdhani, sans-serif',
-                    transition: 'border-color 0.2s',
                   }}
                   onFocus={e => { e.currentTarget.style.borderColor = worldColor; }}
                   onBlur={e => { e.currentTarget.style.borderColor = `${worldColor}44`; }}
@@ -532,15 +552,13 @@ export default function GameScreen() {
                   style={{
                     background: chatInput.trim() ? `linear-gradient(135deg, ${worldColor}cc, ${worldColor})` : 'rgba(255,255,255,0.06)',
                     border: 'none',
-                    borderRadius: 8,
+                    borderRadius: 6,
                     color: chatInput.trim() ? '#fff' : 'var(--text-muted)',
-                    width: 36, height: 36,
+                    width: 28, height: 28,
                     cursor: chatInput.trim() ? 'pointer' : 'default',
-                    fontSize: 16,
+                    fontSize: 12,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'all 0.2s',
                     flexShrink: 0,
-                    boxShadow: chatInput.trim() ? `0 0 12px ${worldGlow}` : 'none',
                   }}
                 >
                   ➤

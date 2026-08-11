@@ -598,18 +598,57 @@ export class GameEngine {
 
   private drawSwitches(ctx: CanvasRenderingContext2D) {
     if (!this.gameState) return;
+
+    const lX = this.local.x + PLAYER_WIDTH / 2;
+    const lY = this.local.y + PLAYER_HEIGHT / 2;
+    const rX = this.remoteDisplay.x + PLAYER_WIDTH / 2;
+    const rY = this.remoteDisplay.y + PLAYER_HEIGHT / 2;
+    const REACH = 80;
+
+    let anyLocalInReach = false;
+    let anyRemoteInReach = false;
+    let inReachSwitch: Switch | null = null;
+
     for (const sw of this.gameState.switches) {
       const visible = sw.world === 'both' || sw.world === this.playerWorld;
       if (!visible) continue;
+
+      const scx = sw.x + sw.width / 2;
+      const scy = sw.y + sw.height / 2;
+      const distLocal = Math.hypot(lX - scx, lY - scy);
+      const distRemote = Math.hypot(rX - scx, rY - scy);
+      const localInReach = distLocal < REACH;
+      const remoteInReach = distRemote < REACH;
+
+      if (localInReach && !sw.isActive) {
+        anyLocalInReach = true;
+        inReachSwitch = sw;
+      }
+      if (remoteInReach && !sw.isActive) {
+        anyRemoteInReach = true;
+      }
 
       ctx.save();
       const isActive = sw.isActive;
       const color = isActive
         ? (this.playerWorld === 'light' ? '#00e676' : '#ff6d00')
-        : (this.playerWorld === 'light' ? '#4fc3f7' : '#ff7043');
+        : (localInReach ? '#ffd54f' : (this.playerWorld === 'light' ? '#4fc3f7' : '#ff7043'));
 
       ctx.shadowColor = color;
-      ctx.shadowBlur = isActive ? 18 : 8;
+      ctx.shadowBlur = isActive ? 22 : (localInReach ? 25 : 8);
+
+      // Proximity ring around switch on ground
+      if (!isActive && distLocal < 140) {
+        ctx.save();
+        ctx.strokeStyle = localInReach ? '#ffd54f' : color + 'aa';
+        ctx.lineWidth = localInReach ? 2.5 : 1.5;
+        ctx.setLineDash([6, 6]);
+        const pulseR = 40 + Math.sin(this.animFrame * 0.08) * 4;
+        ctx.beginPath();
+        ctx.arc(scx, scy, pulseR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
 
       // Base
       ctx.fillStyle = isActive ? color : '#1a1a3e';
@@ -620,21 +659,131 @@ export class GameEngine {
       // Indicator light
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.arc(sw.x + sw.width / 2, sw.y + sw.height / 2, 7, 0, Math.PI * 2);
+      ctx.arc(scx, scy, 7, 0, Math.PI * 2);
       ctx.fill();
 
-      // Label
+      // Switch Label
       if (!isActive) {
         ctx.fillStyle = '#fff';
-        ctx.font = '9px monospace';
+        ctx.font = 'bold 10px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText('E', sw.x + sw.width / 2, sw.y - 14);
-        ctx.fillText(sw.label ?? 'SWITCH', sw.x + sw.width / 2, sw.y - 5);
+        ctx.fillText(sw.label ?? 'SWITCH', scx, sw.y - 12);
       }
+
+      // HIGH VISIBILITY IN-GAME PROMPT BOX
+      if (!isActive && localInReach) {
+        const floatY = Math.sin(this.animFrame * 0.12) * 5;
+        const promptY = sw.y - 48 + floatY;
+
+        // Prompt background pill
+        ctx.fillStyle = 'rgba(10, 10, 30, 0.92)';
+        ctx.strokeStyle = '#ffd54f';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(scx - 65, promptY - 14, 130, 28, 14);
+        ctx.fill();
+        ctx.stroke();
+
+        // Pulsing glow text
+        ctx.fillStyle = '#ffd54f';
+        ctx.font = 'bold 12px Orbitron, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('⚡ PRESS [E] ⚡', scx, promptY);
+
+        // Downward pointer triangle
+        ctx.fillStyle = '#ffd54f';
+        ctx.beginPath();
+        ctx.moveTo(scx - 6, promptY + 14);
+        ctx.lineTo(scx + 6, promptY + 14);
+        ctx.lineTo(scx, promptY + 20);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    // DRAW OVERHEAD SYNC NOTIFICATION BANNER IF BOTH AT SWITCHES
+    this.drawSyncOverlay(ctx, anyLocalInReach, anyRemoteInReach, inReachSwitch);
+  }
+
+  private drawSyncOverlay(
+    ctx: CanvasRenderingContext2D,
+    localInReach: boolean,
+    remoteInReach: boolean,
+    inReachSwitch: Switch | null
+  ) {
+    if (!this.gameState) return;
+
+    // Check if any timed challenge countdown is running
+    const tc = this.gameState.timedChallenge;
+    const activeSwitches = this.gameState.switches.filter(s => s.isActive);
+
+    const bannerX = this.camera.x + (this.canvas.width / this.scaleFactor) / 2;
+    const bannerY = this.camera.y + 115;
+
+    // Case 1: Both players in position at their switches!
+    if (localInReach && remoteInReach) {
+      ctx.save();
+      const pulseScale = 1 + Math.sin(this.animFrame * 0.15) * 0.05;
+      ctx.translate(bannerX, bannerY);
+      ctx.scale(pulseScale, pulseScale);
+
+      ctx.fillStyle = 'rgba(0, 230, 118, 0.95)';
+      ctx.shadowColor = '#00e676';
+      ctx.shadowBlur = 25;
+      ctx.beginPath();
+      ctx.roundRect(-160, -18, 320, 36, 18);
+      ctx.fill();
+
+      ctx.fillStyle = '#04040f';
+      ctx.font = '900 13px Orbitron, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⚡ SYNC READY! PRESS [E] TOGETHER! ⚡', 0, 0);
+      ctx.restore();
+    }
+    // Case 2: Local player is at switch but remote player is not yet there
+    else if (localInReach && !remoteInReach && this.gameState.switches.length > 1) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 213, 79, 0.9)';
+      ctx.shadowColor = '#ffd54f';
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.roundRect(bannerX - 170, bannerY - 16, 340, 32, 16);
+      ctx.fill();
+
+      ctx.fillStyle = '#04040f';
+      ctx.font = 'bold 11px Orbitron, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('READY AT SWITCH — WAITING FOR PARTNER...', bannerX, bannerY);
+      ctx.restore();
+    }
+    // Case 3: Timed challenge active (1 switch pressed, countdown running)
+    else if (tc && tc.isActive && activeSwitches.length > 0 && activeSwitches.length < this.gameState.switches.length) {
+      const elapsed = (Date.now() - tc.startTime) / 1000;
+      const remaining = Math.max(0, tc.duration - elapsed);
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 23, 68, 0.95)';
+      ctx.shadowColor = '#ff1744';
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.roundRect(bannerX - 160, bannerY - 18, 320, 36, 18);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 12px Orbitron, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`⏱️ SYNC TIMER: ${remaining.toFixed(1)}s — PRESS 'E' NOW!`, bannerX, bannerY);
       ctx.restore();
     }
   }
+
 
   private drawEnemies(ctx: CanvasRenderingContext2D) {
     if (!this.gameState) return;
